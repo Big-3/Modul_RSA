@@ -1,38 +1,37 @@
 # @criptografia/modul-rsa - v0.1.0
 
-My module description. Please update with your module data.
+Mòdul que genera un parell de claus RSA.
 
 **`remarks`**
-This module runs perfectly in node.js and browsers
+Ús de bigint-crypto-utils.
 
 ## Table of contents
 
+### Classes
+
+- [PrivateKey](classes/PrivateKey.md)
+- [PublicKey](classes/PublicKey.md)
+
 ### Functions
 
-- [helloWorld](API.md#helloworld)
+- [generateKeys](API.md#generatekeys)
 
 ## Functions
 
-### helloWorld
+### generateKeys
 
-▸ **helloWorld**(`name`): `string`
-
-Returns the a Hello to the input string name
-
-**`remarks`** An example function that runs different code in Node and Browser javascript
+▸ **generateKeys**(`nbits?`): `Promise`<[`PrivateKey`](classes/PrivateKey.md)\>
 
 #### Parameters
 
-| Name | Type | Description |
+| Name | Type | Default value |
 | :------ | :------ | :------ |
-| `name` | `string` | The name to say hello to |
+| `nbits` | `number` | `2048` |
 
 #### Returns
 
-`string`
-
-A gratifying Hello to the input name
+`Promise`<[`PrivateKey`](classes/PrivateKey.md)\>
 
 #### Defined in
 
-[hello-world.ts:10](https://github.com/Big-3/Modul_RSA/blob/d2180c7/src/ts/hello-world.ts#L10)
+[RSA.ts:76](https://github.com/Big-3/Modul_RSA/blob/bdf934f/src/ts/RSA.ts#L76)

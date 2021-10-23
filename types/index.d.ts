@@ -1,10 +1,10 @@
 /**
- * My module description. Please update with your module data.
+ * Mòdul que genera un parell de claus RSA.
  *
  * @remarks
- * This module runs perfectly in node.js and browsers
+ * Ús de bigint-crypto-utils.
  *
  * @packageDocumentation
  */
-export { helloWorld } from './hello-world';
+export { generateKeys, PublicKey, PrivateKey } from './RSA';
 //# sourceMappingURL=index.d.ts.map

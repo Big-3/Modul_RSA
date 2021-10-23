@@ -1,19 +1,75 @@
-/**
- * Returns the a Hello to the input string name
- *
- * @remarks An example function that runs different code in Node and Browser javascript
- *
- * @param name - The name to say hello to
- *
- * @returns A gratifying Hello to the input name
- */
-function helloWorld(name) {
-    const text = `Hello ${name}!`;
-    {
-        console.log(`Node.js says "${text}"`);
+import * as bcu from 'bigint-crypto-utils';
+
+class PublicKey {
+    constructor(e, n) {
+        this.e = e;
+        this.n = n;
     }
-    return text;
+    getExpE() {
+        return this.e;
+    }
+    getModN() {
+        return this.n;
+    }
+    encrypt(m) {
+        return bcu.modPow(m, this.e, this.n); // obtenim c (missatge encriptat)
+    }
+    verify(s) {
+        return bcu.modPow(s, this.e, this.n); // obtenim h (hash encriptat)
+    }
+}
+class PrivateKey {
+    constructor(d, pubKey) {
+        this.d = d;
+        this.pubKey = pubKey;
+    }
+    getExpD() {
+        return this.d;
+    }
+    getPublicKey() {
+        return this.pubKey;
+    }
+    decrypt(c) {
+        return bcu.modPow(c, this.d, this.pubKey.getModN()); // obtenim m (missatge enviat)
+    }
+    sign(h) {
+        return bcu.modPow(h, this.d, this.pubKey.getModN()); // obtenim s (resum hash)
+    }
+}
+async function genPrime(nbits) {
+    let n = BigInt(10);
+    while (!await bcu.isProbablyPrime(n)) {
+        n = await bcu.prime(nbits);
+    }
+    return n;
+}
+function isCoprime(a, b) {
+    const exp = BigInt(1);
+    return bcu.gcd(a, b) === exp;
+}
+function genE(mcm, nbits) {
+    let e = bcu.randBetween(mcm, BigInt(1));
+    while (!isCoprime(e, mcm)) {
+        e = bcu.randBetween(mcm, BigInt(1));
+    }
+    return e;
+}
+async function generateKeys(nbits = 2048) {
+    // Qualsevol 2 nombres primers
+    const p = await genPrime(nbits);
+    const q = await genPrime(nbits);
+    // Calculem el mòdul
+    const n = p * q;
+    const phiN = BigInt((p - BigInt(1)) * (q - BigInt(1)));
+    // Generem l'exponent e:
+    const mcm = bcu.lcm(p - BigInt(1), q - BigInt(1));
+    const e = await genE(mcm);
+    // Generem l'exponent d:
+    const d = bcu.modInv(e, phiN); // ed = 1 mod(phiN)
+    const pubKey = new PublicKey(e, n);
+    const privKey = new PrivateKey(d, pubKey);
+    return privKey;
 }
 
-export { helloWorld };
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXgubm9kZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL3RzL2hlbGxvLXdvcmxkLnRzIl0sInNvdXJjZXNDb250ZW50IjpudWxsLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTs7Ozs7Ozs7O1NBU2dCLFVBQVUsQ0FBRSxJQUFZO0lBQ3RDLE1BQU0sSUFBSSxHQUFHLFNBQVMsSUFBSSxHQUFHLENBQUE7SUFHdEI7UUFDTCxPQUFPLENBQUMsR0FBRyxDQUFDLGlCQUFpQixJQUFJLEdBQUcsQ0FBQyxDQUFBO0tBQ3RDO0lBQ0QsT0FBTyxJQUFJLENBQUE7QUFDYjs7OzsifQ==
+export { PrivateKey, PublicKey, generateKeys };
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXgubm9kZS5qcyIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL3RzL1JTQS50cyJdLCJzb3VyY2VzQ29udGVudCI6bnVsbCwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7TUFDYSxTQUFTO0lBSXBCLFlBQWEsQ0FBUyxFQUFFLENBQVM7UUFDL0IsSUFBSSxDQUFDLENBQUMsR0FBRyxDQUFDLENBQUE7UUFDVixJQUFJLENBQUMsQ0FBQyxHQUFHLENBQUMsQ0FBQTtLQUNYO0lBRU0sT0FBTztRQUNaLE9BQU8sSUFBSSxDQUFDLENBQUMsQ0FBQTtLQUNkO0lBRU0sT0FBTztRQUNaLE9BQU8sSUFBSSxDQUFDLENBQUMsQ0FBQTtLQUNkO0lBRU0sT0FBTyxDQUFFLENBQVM7UUFDdkIsT0FBTyxHQUFHLENBQUMsTUFBTSxDQUFDLENBQUMsRUFBRSxJQUFJLENBQUMsQ0FBQyxFQUFFLElBQUksQ0FBQyxDQUFDLENBQUMsQ0FBQTtLQUNyQztJQUVNLE1BQU0sQ0FBRSxDQUFTO1FBQ3RCLE9BQU8sR0FBRyxDQUFDLE1BQU0sQ0FBQyxDQUFDLEVBQUUsSUFBSSxDQUFDLENBQUMsRUFBRSxJQUFJLENBQUMsQ0FBQyxDQUFDLENBQUE7S0FDckM7Q0FDRjtNQUNZLFVBQVU7SUFJckIsWUFBYSxDQUFTLEVBQUUsTUFBaUI7UUFDdkMsSUFBSSxDQUFDLENBQUMsR0FBRyxDQUFDLENBQUE7UUFDVixJQUFJLENBQUMsTUFBTSxHQUFHLE1BQU0sQ0FBQTtLQUNyQjtJQUVNLE9BQU87UUFDWixPQUFPLElBQUksQ0FBQyxDQUFDLENBQUE7S0FDZDtJQUVNLFlBQVk7UUFDakIsT0FBTyxJQUFJLENBQUMsTUFBTSxDQUFBO0tBQ25CO0lBRU0sT0FBTyxDQUFFLENBQVM7UUFDdkIsT0FBTyxHQUFHLENBQUMsTUFBTSxDQUFDLENBQUMsRUFBRSxJQUFJLENBQUMsQ0FBQyxFQUFFLElBQUksQ0FBQyxNQUFNLENBQUMsT0FBTyxFQUFFLENBQUMsQ0FBQTtLQUNwRDtJQUVNLElBQUksQ0FBRSxDQUFTO1FBQ3BCLE9BQU8sR0FBRyxDQUFDLE1BQU0sQ0FBQyxDQUFDLEVBQUUsSUFBSSxDQUFDLENBQUMsRUFBRSxJQUFJLENBQUMsTUFBTSxDQUFDLE9BQU8sRUFBRSxDQUFDLENBQUE7S0FDcEQ7Q0FDRjtBQUVELGVBQWUsUUFBUSxDQUFFLEtBQWE7SUFDcEMsSUFBSSxDQUFDLEdBQVcsTUFBTSxDQUFDLEVBQUUsQ0FBQyxDQUFBO0lBQzFCLE9BQU8sQ0FBQyxNQUFNLEdBQUcsQ0FBQyxlQUFlLENBQUMsQ0FBQyxDQUFDLEVBQUU7UUFDcEMsQ0FBQyxHQUFHLE1BQU0sR0FBRyxDQUFDLEtBQUssQ0FBQyxLQUFLLENBQUMsQ0FBQTtLQUMzQjtJQUVELE9BQU8sQ0FBQyxDQUFBO0FBQ1YsQ0FBQztBQUVELFNBQVMsU0FBUyxDQUFFLENBQVMsRUFBRSxDQUFTO0lBQ3RDLE1BQU0sR0FBRyxHQUFXLE1BQU0sQ0FBQyxDQUFDLENBQUMsQ0FBQTtJQUM3QixPQUFPLEdBQUcsQ0FBQyxHQUFHLENBQUMsQ0FBQyxFQUFFLENBQUMsQ0FBQyxLQUFLLEdBQUcsQ0FBQTtBQUM5QixDQUFDO0FBRUQsU0FBUyxJQUFJLENBQUUsR0FBVyxFQUFFLEtBQWE7SUFDdkMsSUFBSSxDQUFDLEdBQVcsR0FBRyxDQUFDLFdBQVcsQ0FBQyxHQUFHLEVBQUUsTUFBTSxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUE7SUFDL0MsT0FBTyxDQUFDLFNBQVMsQ0FBQyxDQUFDLEVBQUUsR0FBRyxDQUFDLEVBQUU7UUFDekIsQ0FBQyxHQUFHLEdBQUcsQ0FBQyxXQUFXLENBQUMsR0FBRyxFQUFFLE1BQU0sQ0FBQyxDQUFDLENBQUMsQ0FBQyxDQUFBO0tBQ3BDO0lBRUQsT0FBTyxDQUFDLENBQUE7QUFDVixDQUFDO0FBRU0sZUFBZSxZQUFZLENBQUUsS0FBSyxHQUFHLElBQUk7O0lBRTlDLE1BQU0sQ0FBQyxHQUFXLE1BQU0sUUFBUSxDQUFDLEtBQUssQ0FBQyxDQUFBO0lBQ3ZDLE1BQU0sQ0FBQyxHQUFXLE1BQU0sUUFBUSxDQUFDLEtBQUssQ0FBQyxDQUFBOztJQUd2QyxNQUFNLENBQUMsR0FBVyxDQUFDLEdBQUcsQ0FBQyxDQUFBO0lBQ3ZCLE1BQU0sSUFBSSxHQUFXLE1BQU0sQ0FBQyxDQUFDLENBQUMsR0FBRyxNQUFNLENBQUMsQ0FBQyxDQUFDLEtBQUssQ0FBQyxHQUFHLE1BQU0sQ0FBQyxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUE7O0lBRzlELE1BQU0sR0FBRyxHQUFXLEdBQUcsQ0FBQyxHQUFHLENBQUMsQ0FBQyxHQUFHLE1BQU0sQ0FBQyxDQUFDLENBQUMsRUFBRSxDQUFDLEdBQUcsTUFBTSxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUE7SUFDekQsTUFBTSxDQUFDLEdBQVcsTUFBTSxJQUFJLENBQUMsR0FBVSxDQUFDLENBQUE7O0lBR3hDLE1BQU0sQ0FBQyxHQUFXLEdBQUcsQ0FBQyxNQUFNLENBQUMsQ0FBQyxFQUFFLElBQUksQ0FBQyxDQUFBO0lBRXJDLE1BQU0sTUFBTSxHQUFjLElBQUksU0FBUyxDQUFDLENBQUMsRUFBRSxDQUFDLENBQUMsQ0FBQTtJQUM3QyxNQUFNLE9BQU8sR0FBZSxJQUFJLFVBQVUsQ0FBQyxDQUFDLEVBQUUsTUFBTSxDQUFDLENBQUE7SUFFckQsT0FBTyxPQUFPLENBQUE7QUFDaEI7Ozs7In0=
