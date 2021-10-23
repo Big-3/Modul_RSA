@@ -1,17 +1,22 @@
 {
-  "name": "@my-scope/my-package-name",
-  "version": "0.9.4",
-  "description": "My package is wonderful",
+  "name": "@criptografia/modul-rsa",
+  "version": "0.1.0",
+  "description": "Modul d'encriptació i desencriptació que utilitza l'algoritme RSA",
   "keywords": [
-    "keyword1",
-    "keyword2"
+    "RSA"
   ],
   "license": "MIT",
   "author": {
-    "name": "My name",
-    "email": "email@myemaildomain.com"
+    "name": "Joel",
+    "email": "joel.compte@estudiantat.upc.edu"
   },
-  "repository": "repoprovider:username/my-package-name",
+  "contributors": [
+    {
+      "name": "Albert",
+      "email": "albert.saez.nunez@estudiantat.upc.edu"
+    }
+  ],
+  "repository": "github:Big-3/Modul_RSA",
   "types": "./types/index.d.ts",
   "main": "./dist/cjs/index.node.cjs",
   "browser": "./dist/esm/index.browser.js",
@@ -78,6 +83,7 @@
     "@rollup/plugin-typescript": "^8.2.0",
     "@types/chai": "^4.2.22",
     "@types/mocha": "^9.0.0",
+    "bigint-crypto-utils": "^3.0.20",
     "chai": "^4.3.3",
     "fs-extra": "^10.0.0",
     "glob": "^7.2.0",
